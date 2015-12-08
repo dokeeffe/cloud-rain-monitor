@@ -48,7 +48,7 @@
 #define BUFFERSIZE 350
 
 const char website[] PROGMEM = "dweet.io";
-const char dweetDevice[] PROGMEM = "ballyhouraobservatoryweather";
+const char dweetDevice[] PROGMEM = "putyourdweetdevicehere";
 
 //HTTP responses
 const char WEATHER_RESPONSE[] PROGMEM = "HTTP/1.0 200 OK\r\nContent-Type: application/json\r\n"

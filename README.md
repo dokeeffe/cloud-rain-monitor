@@ -1,6 +1,6 @@
 # cloud-rain-monitor
 
-Arduino firmware for a device to measure rain and cloud cover for an astronomical observatory located in Ireland.
+Arduino firmware for a device to measure rain and cloud cover for an astronomical observatory.
 
 The device offers an HTTP interface to GET current conditions as well as posting messages to http://dweet.io.
 

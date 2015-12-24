@@ -2,7 +2,7 @@
 
 Arduino firmware for a device to measure rain and cloud cover for an astronomical observatory.
 
-![example measurements](https://github.com/dokeeffe/cloud-rain-monitor/d3-graph/example.png "Example measurements")
+![example measurements](https://raw.githubusercontent.com/dokeeffe/cloud-rain-monitor/master/d3-graph/example.png "Example measurements")
 
 
 The device offers an HTTP interface to GET current conditions as well as posting messages to http://dweet.io.

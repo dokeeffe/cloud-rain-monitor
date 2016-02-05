@@ -1,8 +1,8 @@
 /**
  * Arduino firmware for a basic weather station for an astronomical observatory. 
- * Monitors temperature & humidity using a DHT11 sensor, rain using a rain sensor and clouds using an MLX90614 IR temperature sensor to measure sky temperature.
+ * Monitors temperature & humidity using a DHT11 sensor, rain using an RG-11 rain sensor and clouds using an MLX90614 IR temperature sensor to measure sky temperature.
  * 
- * Provides an HTTP interface and also POSTs to dweet.io IOT provider
+ * Provides an HTTP interface.
  *
  * Uses the ethercard library by Jean-Claude Wippler (https://github.com/jcw/ethercard) You will need to install this in your arduino IDE to flash this firmware. See instrunctions in the ethercard github project page.
  * NOTE you must enable format $T by uncommenting '#define FLOATEMIT' in the library. See http://jeelabs.net/pub/docs/ethercard/classBufferFiller.html
@@ -13,7 +13,7 @@
  *
  * PARTS:
  * 1 x Arduino nano (http://www.dx.com/p/arduino-nano-v3-0-81877#.ViKE2RCrRE4)
- * 1 x Deal extreme rain sensor
+ * 1 x RG-11 Rain sensor
  * 1 x DHT11 temp&humidity sensor
  * 1 x MLX90614 IR temp sensor 
  * 
@@ -47,9 +47,6 @@
 
 #define BUFFERSIZE 350
 
-const char website[] PROGMEM = "dweet.io";
-const char dweetDevice[] PROGMEM = "putyourdweetdevicehere";
-
 //HTTP responses
 const char WEATHER_RESPONSE[] PROGMEM = "HTTP/1.0 200 OK\r\nContent-Type: application/json\r\n"
                                           "Pragma: no-cache\r\n\r\n" 
@@ -69,9 +66,7 @@ const char NOTFOUND_RESPONSE[] PROGMEM = "HTTP/1.0 404 Not Found";
 #define DHTTYPE DHT11   // DHT11 sensor type
 #define RAINPIN 2 //rain sensor
 #define SAMPLE_INTERVAL 2000 //how often to take a reading.
-#define DWEET_POST_INTERVAL 60000 //how often to send to dweet
 static long lastSampleTime = 0;
-static long lastDweetTime = 0;
 
 static double latestTempReading;
 static double latestHumidityReading;
@@ -118,16 +113,14 @@ void setup() {
 
 /**
  * Main loop. Monitor for HTTP requests and sample sensor data every SAMPLE_INTERVAL. 
- * POST data to dweet on changeInConditions or every DWEET_POST_INTERVAL
  */
 void loop() {
   if (millis()-lastSampleTime > SAMPLE_INTERVAL) {
     sample();
     lastSampleTime = millis();
   }
-  if (millis()-lastDweetTime > DWEET_POST_INTERVAL || changeInConditions) {
-    dweet();
-    lastDweetTime = millis();
+  if (changeInConditions) {
+    //TODO: Fire an event / message to a message bus
     changeInConditions = false;
   }
   word len = ether.packetReceive();
@@ -197,51 +190,6 @@ void sample() {
   latestOutsideTemp = mlx.readAmbientTempC();
   latestDewPoint = dewPointFast(latestTempReading,latestHumidityReading);
   changeInConditions = detectChangeInConditions();
-}
-
-/**
- * POST a message to dweet
- **/
-void dweet() {
-  ether.printIp("IP:  ", ether.myip);
-  ether.printIp("GW:  ", ether.gwip);  
-  ether.printIp("DNS: ", ether.dnsip);  
-
-  if (!ether.dnsLookup(website))
-    Serial.println(F("DNS failed"));
-
-  ether.printIp("SRV: ", ether.hisip);
-  
-  byte sd = stash.create();
-  stash.print("{");
-  stash.print("\"insideTemp\": ");
-  stash.print(latestTempReading);
-  stash.print(",\"insideHumidity\": ");
-  stash.print(latestHumidityReading);
-  stash.print(",\"dewPoint\": ");
-  stash.print(latestDewPoint);
-  stash.print(",\"skyTemp\": ");
-  stash.print(latestSkyTemp);
-  stash.print(",\"outsideTemp\": ");
-  stash.print(latestOutsideTemp);
-  if(latestRainReading) {
-    stash.print(",\"rain\": true ");
-  } else {
-    stash.print(",\"rain\": false ");
-  }
-  stash.println(" }");
-  stash.save();
-  int stash_size = stash.size();
-  
-  Stash::prepare(PSTR("POST http://$F/dweet/for/$F HTTP/1.0" "\r\n"
-            "Host: $F" "\r\n"
-            "Content-Length: $D" "\r\n"
-            "Content-Type: application/json" "\r\n"
-            "\r\n"
-            "$H"),
-            website,dweetDevice, website,stash_size,sd);
-  ether.tcpSend();
-  Serial.println("sent");
 }
 
 /**

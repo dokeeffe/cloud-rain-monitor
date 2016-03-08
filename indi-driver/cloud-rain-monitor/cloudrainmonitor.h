@@ -39,13 +39,16 @@ class IndiCloudRainMonitor : public INDI::Weather
     const char *getDefaultName();
 
     virtual bool initProperties();
+    virtual void ISGetProperties (const char *dev);
+    virtual bool ISNewText (const char *dev, const char *name, char *texts[], char *names[], int n);
 
     protected:
     virtual IPState updateWeather();
     virtual bool saveConfigItems(FILE *fp);
     
     private:
-    IText HttpEndpointT[1];
+    IText httpEndpointT[1];
+    ITextVectorProperty httpEndpointTP;
 
 };
 

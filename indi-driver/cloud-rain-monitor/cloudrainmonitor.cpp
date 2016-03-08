@@ -108,7 +108,8 @@ const char * IndiCloudRainMonitor::getDefaultName()
 
 bool IndiCloudRainMonitor::Connect()
 {
-    if (HttpEndpointT[0].text == NULL)
+    DEBUG(INDI::Logger::DBG_SESSION, "CONNECTING.");
+    if (httpEndpointT[0].text == NULL)
     {
         DEBUG(INDI::Logger::DBG_ERROR, "cloudrainmonitor HTTP API endpoint is not available. Set it in the options tab");
         return false;   
@@ -120,7 +121,7 @@ bool IndiCloudRainMonitor::Connect()
  
     curl = curl_easy_init();
     if(curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, HttpEndpointT[0].text);
+        curl_easy_setopt(curl, CURLOPT_URL, httpEndpointT[0].text);
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L); //10 sec timeout
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
@@ -167,14 +168,40 @@ bool IndiCloudRainMonitor::initProperties()
 {
     INDI::Weather::initProperties();
     
-    IUFillText(&HttpEndpointT[0], "API_ENDPOINT", "API Endpoint", "http://192.168.1.204/weather"); //this is the default but can be changed in the options OPTIONS_TAB.
-    IUFillTextVector(&HttpEndpointTP, HttpEndpointT, 1, getDeviceName(), "HTTP_API_ENDPOINT", "HTTP endpoint", OPTIONS_TAB, IP_RW, 60, IPS_IDLE);
+    IUFillText(&httpEndpointT[0], "API_ENDPOINT", "API Endpoint", "http://192.168.1.204/weather"); //this is the default but can be changed in the options OPTIONS_TAB.
+    IUFillTextVector(&httpEndpointTP, httpEndpointT, 1, getDeviceName(), "HTTP_API_ENDPOINT", "HTTP endpoint", OPTIONS_TAB, IP_RW, 5, IPS_IDLE);
     
     addParameter("WEATHER_RAIN", "Rain", 0, 0, 0, 0);
     setCriticalParameter("WEATHER_RAIN");
     
     addDebugControl();
     return true;
+}
+
+void IndiCloudRainMonitor::ISGetProperties(const char *dev)
+{
+    INDI::Weather::ISGetProperties(dev);
+
+    defineText(&httpEndpointTP);
+
+    loadConfig(true, "API_ENDPOINT");
+}
+
+bool IndiCloudRainMonitor::ISNewText (const char *dev, const char *name, char *texts[], char *names[], int n)
+{
+    if(!strcmp(dev,getDeviceName()))
+    {
+        if (!strcmp(httpEndpointTP.name, name))
+        {
+            IUUpdateText(&httpEndpointTP, texts, names, n);
+            httpEndpointTP.s = IPS_OK;
+            IDSetText(&httpEndpointTP, NULL);
+            return true;
+        }
+
+    }
+
+     return INDI::Weather::ISNewText(dev,name,texts,names,n);
 }
 
 /**
@@ -188,7 +215,7 @@ IPState IndiCloudRainMonitor::updateWeather()
  
     curl = curl_easy_init();
     if(curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, HttpEndpointT[0].text);
+        curl_easy_setopt(curl, CURLOPT_URL, httpEndpointT[0].text);
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L); //10 sec timeout
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
@@ -222,8 +249,9 @@ IPState IndiCloudRainMonitor::updateWeather()
         for (it = begin(value); it!= end(value); ++it) {
             DEBUGF(INDI::Logger::DBG_DEBUG, "iterating %s", it->key);
             if (!strcmp(it->key, "rain")) {
-                DEBUGF(INDI::Logger::DBG_DEBUG, "Setting rain value from response %s", it->value);
-                if(it->value=='true') {
+                //bool raining = it->value.toBool();
+                //DEBUGF(INDI::Logger::DBG_DEBUG, "Setting rain value from response %s", it->value);
+                if (it->value.getTag()==JSON_TRUE) {
                     setParameterValue("WEATHER_RAIN", 1);
                 } else {
                     setParameterValue("WEATHER_RAIN", 0);
@@ -237,46 +265,14 @@ IPState IndiCloudRainMonitor::updateWeather()
             }
         }
     }
-
-    
-    
-    
-    
-    
-    
-      
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-      FILE *in;
-      char buff[8];
-      if (!(in = popen("gpio read 4", "r")))
-      {
-        DEBUG(INDI::Logger::DBG_ERROR, "Unable to read GPIO.");
-        IPS_ALERT;
-      }
-
-      fgets(buff, sizeof(buff), in);
-      pclose(in);
-
-	DEBUGF(INDI::Logger::DBG_SESSION, "GPIO buffer (%s)", buff);
-
-        if (atoi(buff) == 0)
-            setParameterValue("WEATHER_RAIN", 1);
-        else
-            setParameterValue("WEATHER_RAIN", 0);
-
     return IPS_OK;
+}
+
+bool IndiCloudRainMonitor::saveConfigItems(FILE *fp)
+{
+    INDI::Weather::saveConfigItems(fp);
+
+    IUSaveConfigText(fp, &httpEndpointTP);
+
+    return true;
 }

@@ -22,6 +22,10 @@ Example request to /weather
 
 Clouds are detected using an Melexis [MLX90614](http://www.melexis.com/Infrared-Thermometer-Sensors/Infrared-Thermometer-Sensors/MLX90614-615.aspx) sensor to measure IR radiation from the sky. 
 
-Rain is detected using a [cheap rain sensor](http://www.dx.com/p/cg05sz-063-rain-sensor-for-arduino-black-silver-works-with-official-arduino-boards-266534#.VmdKgt_hBE4) 
+![MLX90614](http://www.melexis.com/prodfiles/0005150_IR_sensor.jpg?sNU=83173.3492981)
+
+Rain is detected using an [RG-11 rain sensor](http://rainsensors.com/) 
+
+![rg-11](http://hydreon.com/wp-content/uploads/sites/3/2015/rg_wht_sm.jpg)
 
 An [Indi Driver](http://www.indilib.org/devices/weather-stations.html) for observatory automation is currently a work in progress

@@ -1,6 +1,6 @@
 # cloud-rain-monitor
 
-Arduino firmware for a device to measure rain and cloud cover for an astronomical observatory. Cloud cover is determined by measuring the difference between ambient temperature and IR radiation from the sky.
+Arduino firmware and indi-driver for a device to measure rain and cloud cover for an astronomical observatory. Cloud cover is determined by measuring the difference between ambient temperature and IR radiation from the sky.
 
 ![example measurements](https://raw.githubusercontent.com/dokeeffe/cloud-rain-monitor/master/d3-graph/example.png "Example measurements")
 
@@ -28,4 +28,10 @@ Rain is detected using an [RG-11 rain sensor](http://rainsensors.com/)
 
 ![rg-11](http://hydreon.com/wp-content/uploads/sites/3/2015/rg_wht_sm.jpg)
 
-An [Indi Driver](http://www.indilib.org/devices/weather-stations.html) for observatory automation is currently a work in progress
+An [Indi Driver](http://www.indilib.org/devices/weather-stations.html) for observatory automation is also included.
+
+![indi-driver](https://raw.githubusercontent.com/dokeeffe/cloud-rain-monitor/master/indi-driver/docs/indi.png)
+
+The device and driver is currently used in Ballyhoura Observatory
+![observatory](https://raw.githubusercontent.com/dokeeffe/cloud-rain-monitor/master/indi-driver/docs/obs.jpg)
+

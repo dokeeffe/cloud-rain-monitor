@@ -46,8 +46,7 @@
 
 #include <curl/curl.h>
 
-// We declare an auto pointer to RG11RainSensor.
-std::unique_ptr<IndiCloudRainMonitor> Indicloudrainmonitor(new IndiCloudRainMonitor());
+std::unique_ptr<IndiCloudRainMonitor> indicloudrainmonitor(new IndiCloudRainMonitor());
 
 static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
@@ -57,22 +56,22 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 
 void ISGetProperties(const char *dev)
 {
-        Indicloudrainmonitor->ISGetProperties(dev);
+        indicloudrainmonitor->ISGetProperties(dev);
 }
 
 void ISNewSwitch(const char *dev, const char *name, ISState *states, char *names[], int num)
 {
-        Indicloudrainmonitor->ISNewSwitch(dev, name, states, names, num);
+        indicloudrainmonitor->ISNewSwitch(dev, name, states, names, num);
 }
 
 void ISNewText(	const char *dev, const char *name, char *texts[], char *names[], int num)
 {
-        Indicloudrainmonitor->ISNewText(dev, name, texts, names, num);
+        indicloudrainmonitor->ISNewText(dev, name, texts, names, num);
 }
 
 void ISNewNumber(const char *dev, const char *name, double values[], char *names[], int num)
 {
-        Indicloudrainmonitor->ISNewNumber(dev, name, values, names, num);
+        indicloudrainmonitor->ISNewNumber(dev, name, values, names, num);
 }
 
 void ISNewBLOB (const char *dev, const char *name, int sizes[], int blobsizes[], char *blobs[], char *formats[], char *names[], int n)
@@ -88,7 +87,7 @@ void ISNewBLOB (const char *dev, const char *name, int sizes[], int blobsizes[],
 }
 void ISSnoopDevice (XMLEle *root)
 {
-    Indicloudrainmonitor->ISSnoopDevice(root);
+    indicloudrainmonitor->ISSnoopDevice(root);
 }
 
 IndiCloudRainMonitor::IndiCloudRainMonitor()
@@ -128,7 +127,7 @@ bool IndiCloudRainMonitor::Connect()
         res = curl_easy_perform(curl);
         /* Check for errors */ 
         if(res != CURLE_OK) {
-	        DEBUGF(INDI::Logger::DBG_ERROR, "Connecttion to HTTP endpoint failed:%s",curl_easy_strerror(res));
+            DEBUG(INDI::Logger::DBG_ERROR, "Connecttion to HTTP endpoint failed");
             DEBUG(INDI::Logger::DBG_ERROR, "Is the HTTP API endpoint correct? Set it in the options tab. Can you ping the weather device?");
             return false;
         }
@@ -173,6 +172,10 @@ bool IndiCloudRainMonitor::initProperties()
     
     addParameter("WEATHER_RAIN", "Rain", 0, 0, 0, 0);
     setCriticalParameter("WEATHER_RAIN");
+    addParameter("WEATHER_STATION_ONLINE", "Station Online", 0, 0, 0, 0);
+    setCriticalParameter("WEATHER_STATION_ONLINE");
+    addParameter("WEATHER_CLOUD_COVER", "Cloud Cover", 0, 0, 0, 0);
+    setCriticalParameter("WEATHER_CLOUD_COVER");
     
     addDebugControl();
     return true;
@@ -183,8 +186,7 @@ void IndiCloudRainMonitor::ISGetProperties(const char *dev)
     INDI::Weather::ISGetProperties(dev);
 
     defineText(&httpEndpointTP);
-
-    loadConfig(true, "API_ENDPOINT");
+    loadConfig(true, "HTTP_API_ENDPOINT");
 }
 
 bool IndiCloudRainMonitor::ISNewText (const char *dev, const char *name, char *texts[], char *names[], int n)
@@ -209,6 +211,7 @@ bool IndiCloudRainMonitor::ISNewText (const char *dev, const char *name, char *t
  */
 IPState IndiCloudRainMonitor::updateWeather()
 {
+    DEBUG(INDI::Logger::DBG_DEBUG, "Updating from weather API_ENDPOINT");
     CURL *curl;
     CURLcode res;
     std::string readBuffer;
@@ -221,11 +224,18 @@ IPState IndiCloudRainMonitor::updateWeather()
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
         res = curl_easy_perform(curl);
         /* Check for errors */ 
+            
+        DEBUG(INDI::Logger::DBG_DEBUG, "curl complete");
+
         if(res != CURLE_OK) {
-	        DEBUGF(INDI::Logger::DBG_ERROR, "Connecttion to HTTP_API_ENDPOINT failed:%s",curl_easy_strerror(res));
+            DEBUG(INDI::Logger::DBG_ERROR, "curl failed!!!!!!");
+//            DEBUGF(INDI::Logger::DBG_ERROR, "Connecttion to HTTP_API_ENDPOINT failed:%s",curl_easy_strerror(res));
             DEBUG(INDI::Logger::DBG_ERROR, "Cant contact weather device setting alert state");
-            return IPS_ALERT;
+            setParameterValue("WEATHER_STATION_ONLINE", 1);
+            return IPS_OK;
         }
+        DEBUG(INDI::Logger::DBG_DEBUG, "curl ok");
+
         /* always cleanup */ 
         curl_easy_cleanup(curl);
 
@@ -240,12 +250,13 @@ IPState IndiCloudRainMonitor::updateWeather()
         if (status != JSON_OK)
         {
             DEBUG(INDI::Logger::DBG_ERROR, "NON OK response, setting alert state");
-            DEBUGF(INDI::Logger::DBG_ERROR, "%s at %zd", jsonStrError(status), endptr - source);
-            DEBUGF(INDI::Logger::DBG_DEBUG, "%s", readBuffer.c_str());
-            return IPS_ALERT;
+            setParameterValue("WEATHER_STATION_ONLINE", 1);
+            return IPS_OK;
         }
         DEBUGF(INDI::Logger::DBG_DEBUG, "http response %s", readBuffer.c_str());
         JsonIterator it;
+        double skyTemp;
+        double ambientTemp;
         for (it = begin(value); it!= end(value); ++it) {
             DEBUGF(INDI::Logger::DBG_DEBUG, "iterating %s", it->key);
             if (!strcmp(it->key, "rain")) {
@@ -259,12 +270,27 @@ IPState IndiCloudRainMonitor::updateWeather()
             }
             if (!strcmp(it->key, "skyTemp")) {
                 DEBUGF(INDI::Logger::DBG_DEBUG, "Got skyTemp from response %g", it->value.toNumber());
+                skyTemp = it->value.toNumber();
             }
             if (!strcmp(it->key, "outsideTemp")) {
                 DEBUGF(INDI::Logger::DBG_DEBUG, "Got outsideTemp from response %g", it->value.toNumber());
+                ambientTemp = it->value.toNumber();
             }
         }
+        double combinedTemp = skyTemp + ambientTemp;
+        //TODO: A function to determine cloud cover based on the 2 inputs, skyTemp and ambientTemp
+        DEBUGF(INDI::Logger::DBG_DEBUG, "CMB TEMP %g", combinedTemp);
+        if(combinedTemp < -8) {
+            setParameterValue("WEATHER_CLOUD_COVER", 0);             
+        } else if (combinedTemp <-5 && combinedTemp > -8 ) {
+            setParameterValue("WEATHER_CLOUD_COVER", 20);
+        } else if (combinedTemp <-0 && combinedTemp > -5 ) {
+            setParameterValue("WEATHER_CLOUD_COVER", 90);
+        } else {
+            setParameterValue("WEATHER_CLOUD_COVER", 100);
+        }
     }
+    setParameterValue("WEATHER_STATION_ONLINE", 0);
     return IPS_OK;
 }
 

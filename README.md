@@ -33,5 +33,5 @@ An [Indi Driver](http://www.indilib.org/devices/weather-stations.html) for obser
 ![indi-driver](https://raw.githubusercontent.com/dokeeffe/cloud-rain-monitor/master/indi-driver/docs/indi.png)
 
 The device and driver is currently used in Ballyhoura Observatory
-![observatory](https://raw.githubusercontent.com/dokeeffe/cloud-rain-monitor/master/indi-driver/docs/obs.jpg)
+![observatory](https://raw.githubusercontent.com/dokeeffe/cloud-rain-monitor/master/indi-driver/docs/obs.jpeg)
 

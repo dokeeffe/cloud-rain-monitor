@@ -1,0 +1,2 @@
+To build and install this indi driver, cd to the same dir as the build.sh script, then sudo ./build.sh
+You will need indi dev dependencies installed. Cmake wll inform of any missing deps.

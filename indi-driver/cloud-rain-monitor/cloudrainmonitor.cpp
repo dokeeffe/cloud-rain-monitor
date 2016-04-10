@@ -277,18 +277,16 @@ IPState IndiCloudRainMonitor::updateWeather()
                 ambientTemp = it->value.toNumber();
             }
         }
-        double combinedTemp = skyTemp + ambientTemp;
-        //TODO: A function to determine cloud cover based on the 2 inputs, skyTemp and ambientTemp
-        DEBUGF(INDI::Logger::DBG_DEBUG, "CMB TEMP %g", combinedTemp);
-        if(combinedTemp < -8) {
-            setParameterValue("WEATHER_CLOUD_COVER", 0);             
-        } else if (combinedTemp <-5 && combinedTemp > -8 ) {
-            setParameterValue("WEATHER_CLOUD_COVER", 20);
-        } else if (combinedTemp <-0 && combinedTemp > -5 ) {
-            setParameterValue("WEATHER_CLOUD_COVER", 90);
-        } else {
-            setParameterValue("WEATHER_CLOUD_COVER", 100);
+        //Function based on data collected, guesswork and linear regression using wolframalpha https://www.wolframalpha.com/input/?i=linear+fit+{0,+100},{-1,+90},{-2,+80},{-3,+50},{-4,+25},{-5,+10},{-6,0}&lk=3
+        double result = (18 * skyTemp) + 100;
+        if(result > 100) {
+            result = 100;
         }
+        if(result < 0) {
+            result = 0;
+        }
+        DEBUGF(INDI::Logger::DBG_DEBUG, "CLOUD %g", result);
+        setParameterValue("WEATHER_CLOUD_COVER", result);      
     }
     setParameterValue("WEATHER_STATION_ONLINE", 0);
     return IPS_OK;

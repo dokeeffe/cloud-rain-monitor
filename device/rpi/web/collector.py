@@ -14,7 +14,9 @@ class Collector():
     NAME = "Collector"
 
     def __init__(self, port):
-        # super(Comm,self).__init__(Comm.NAME)
+        self.last_rain_reading = False;
+        self.last_sky_temperature_reading = 0;
+        self.last_ambient_temperature_reading = 0;
         self.board = Arduino(port)
         # start an iterator thread so that serial buffer doesn't overflow
         it = util.Iterator(self.board)
@@ -22,17 +24,17 @@ class Collector():
         self.board.add_cmd_handler(pyfirmata.pyfirmata.STRING_DATA, self._messageHandler)
 
     def _messageHandler(self, *args, **kwargs):
-        conn = sqlite3.connect('weather_sensor.db')
-        c = conn.cursor()
         readings = json.loads(util.two_byte_iter_to_str(args))
         sky_temperature = readings['sky']
         ambient_temperature = readings['ambient']
         rain = readings['rain']
-        c.execute("INSERT INTO weather_sensor (rain,sky_temperature,ambient_temperature) VALUES (?,?,?)", (rain, sky_temperature,ambient_temperature))
-        # new_id = c.lastrowid
-        conn.commit()
-        c.close()
-
+        if self.conditions_changed(sky_temperature,ambient_temperature,rain):
+            conn = sqlite3.connect('weather_sensor.db')
+            c = conn.cursor()
+            c.execute("INSERT INTO weather_sensor (rain,sky_temperature,ambient_temperature) VALUES (?,?,?)", (rain, sky_temperature,ambient_temperature))
+            # new_id = c.lastrowid
+            conn.commit()
+            c.close()
 
     def update(self):
         super(Collector,self).update()
@@ -49,3 +51,6 @@ class Collector():
 
     def latestWeatherStatus(self):
         return self.sky_temperature
+
+    def conditions_changed(self, sky_temperature, ambient_temperature, rain):
+        return True

@@ -48,6 +48,7 @@ class Collector():
             self.last_rain_reading_saved = rain
             self.last_sky_temperature_reading_saved = sky_temperature
             self.last_ambient_temperature_reading_saved = ambient_temperature
+            self.last_reading_saved_time = time.time()
             c.close()
 
     def update(self):

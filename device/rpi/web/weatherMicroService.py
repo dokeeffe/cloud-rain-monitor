@@ -9,6 +9,11 @@ A very simple python bottle micro service for weather
 
 @route('/weather/current')
 def current_weather():
+    '''
+    GET the current weather state. the latest reading persisted in the DB.
+    TODO: If the reading is older than 5min then return 404?
+    :return:
+    '''
     conn = sqlite3.connect('weather_sensor.db')
     c = conn.cursor()
     c.execute("SELECT rain,sky_temperature,ambient_temperature, date_sensor_read FROM weather_sensor order by id desc limit 1")
@@ -18,6 +23,11 @@ def current_weather():
 
 @route('/weather')
 def current_weather():
+    '''
+    Return all the weather data recorded
+    TODO: pagination or trim the data to 1 day
+    :return:
+    '''
     conn = sqlite3.connect('weather_sensor.db')
     c = conn.cursor()
     c.execute("SELECT rain,sky_temperature, ambient_temperature, date_sensor_read FROM weather_sensor")

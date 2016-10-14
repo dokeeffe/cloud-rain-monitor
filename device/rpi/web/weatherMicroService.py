@@ -7,6 +7,24 @@ from collector import Collector
 A very simple python bottle micro service for weather
 '''
 
+
+def estimate_cloud_cover(sky_temp, outside_temp):
+    '''
+    PURE guesswork currently!!! Will update this when more data collected
+    :param sky_temp:
+    :param outside_temp:
+    :return:
+    '''
+    if sky_temp < -12:
+        return 0
+    elif sky_temp > -12 and sky_temp < -10:
+        return 10
+    elif sky_temp > -10 and sky_temp < -5:
+        return 75
+    elif sky_temp > -5:
+        return 100
+
+
 @route('/weather/current')
 def current_weather():
     '''
@@ -19,7 +37,12 @@ def current_weather():
     c.execute("SELECT rain,sky_temperature,ambient_temperature, date_sensor_read FROM weather_sensor order by id desc limit 1")
     result = c.fetchall()
     c.close()
-    return {'rain': result[0][0]==1, 'skyTemp': result[0][1], 'outsideTemp': result[0][2], 'readingTimestamp': result[0][3]}
+    sky_temp = result[0][1]
+    outside_temp = result[0][2]
+    reading_timestamp = result[0][3]
+    rain = result[0][0] == 1
+    cloud_cover = estimate_cloud_cover(float(sky_temp), float(outside_temp))
+    return {'rain': rain, 'skyTemp': sky_temp, 'outsideTemp': outside_temp, 'readingTimestamp': reading_timestamp, 'cloudCover':cloud_cover}
 
 @route('/weather')
 def current_weather():

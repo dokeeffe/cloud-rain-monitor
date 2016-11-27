@@ -17,15 +17,18 @@ def estimate_cloud_cover(sky_temp, outside_temp):
     :param outside_temp:
     :return:
     '''
-    temp_diff = sky_temp - outside_temp
-    if temp_diff < -20:
-        return 0
-    elif temp_diff  > -20 and sky_temp < -15:
-        return 30
-    elif temp_diff > -15 and temp_diff < -5:
-        return 75
-    elif temp_diff > -5:
+    if sky_temp > -5:
         return 100
+    else:
+        temp_diff = sky_temp - outside_temp
+        if temp_diff < -20:
+            return 0
+        elif temp_diff  > -20 and sky_temp < -15:
+            return 30
+        elif temp_diff > -15 and temp_diff < -5:
+            return 75
+        elif temp_diff > -5:
+            return 100
 
 
 @route('/weather/current')

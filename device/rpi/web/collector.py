@@ -43,6 +43,7 @@ class Collector():
             c = conn.cursor()
             c.execute("INSERT INTO weather_sensor (rain,sky_temperature,ambient_temperature) VALUES (?,?,?)",
                       (rain, sky_temperature, ambient_temperature))
+            c.execute("DELETE FROM weather_sensor WHERE  date_sensor_read <= date('now','-2 day')")
             # new_id = c.lastrowid
             conn.commit()
             self.last_rain_reading_saved = rain

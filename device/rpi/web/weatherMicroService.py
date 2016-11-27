@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sqlite3
 from bottle import route, run, debug, error
 

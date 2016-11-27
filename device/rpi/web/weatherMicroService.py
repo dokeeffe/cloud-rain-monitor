@@ -15,13 +15,14 @@ def estimate_cloud_cover(sky_temp, outside_temp):
     :param outside_temp:
     :return:
     '''
-    if sky_temp < -12:
+    temp_diff = sky_temp - outside_temp
+    if temp_diff < -20:
         return 0
-    elif sky_temp > -12 and sky_temp < -10:
-        return 10
-    elif sky_temp > -10 and sky_temp < -5:
+    elif temp_diff  > -20 and sky_temp < -15:
+        return 30
+    elif temp_diff > -15 and temp_diff < -5:
         return 75
-    elif sky_temp > -5:
+    elif temp_diff > -5:
         return 100
 
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sqlite3
-from bottle import route, run, debug, error
+from bottle import route, run, debug, error, request
 
 from collector import Collector
 
@@ -50,16 +50,16 @@ def current_weather():
     cloud_cover = estimate_cloud_cover(float(sky_temp), float(outside_temp))
     return {'rain': rain, 'skyTemp': sky_temp, 'outsideTemp': outside_temp, 'readingTimestamp': reading_timestamp, 'cloudCover':cloud_cover}
 
-@route('/weather')
-def current_weather():
+@route('/weather/history')
+def historical_weather():
     '''
-    Return all the weather data recorded
-    TODO: pagination or trim the data to 1 day
+    Return historical weather data. Pass days=x as a qurey string arg to get the previous x days data.
     :return:
     '''
     conn = sqlite3.connect('weather_sensor.db')
     c = conn.cursor()
-    c.execute("SELECT rain,sky_temperature, ambient_temperature, date_sensor_read FROM weather_sensor")
+    days = request.query.days or 1
+    c.execute("SELECT rain,sky_temperature, ambient_temperature, date_sensor_read FROM weather_sensor WHERE date_sensor_read >= date('now','-{} day')".format(days))
     result = c.fetchall()
     c.close()
     history = []
@@ -71,8 +71,8 @@ def current_weather():
 
 
 con = sqlite3.connect('weather_sensor.db')
-con.execute("DROP TABLE IF EXISTS weather_sensor")
-con.execute("CREATE TABLE weather_sensor (id INTEGER PRIMARY KEY, rain bool NOT NULL, sky_temperature NUMBER NOT NULL, ambient_temperature NUMBER NOT NULL, date_sensor_read DATETIME DEFAULT CURRENT_TIMESTAMP)")
+#con.execute("DROP TABLE IF EXISTS weather_sensor")
+con.execute("CREATE TABLE IF NOT EXISTS weather_sensor (id INTEGER PRIMARY KEY, rain bool NOT NULL, sky_temperature NUMBER NOT NULL, ambient_temperature NUMBER NOT NULL, date_sensor_read DATETIME DEFAULT CURRENT_TIMESTAMP)")
 con.commit()
 collector = Collector('/dev/ttyACM0')
 run(host='0.0.0.0', port=8080)

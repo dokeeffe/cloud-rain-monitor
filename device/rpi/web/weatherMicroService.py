@@ -58,5 +58,5 @@ def cloud_chart(chart):
 con = sqlite3.connect('weather_sensor.db')
 con.execute("CREATE TABLE IF NOT EXISTS weather_sensor (id INTEGER PRIMARY KEY, rain bool NOT NULL, sky_temperature NUMBER NOT NULL, ambient_temperature NUMBER NOT NULL, date_sensor_read DATETIME DEFAULT CURRENT_TIMESTAMP)")
 con.commit()
-# collector = Collector('/dev/ttyACM0')
+collector = Collector('/dev/ttyACM0')
 run(host='0.0.0.0', port=8080)

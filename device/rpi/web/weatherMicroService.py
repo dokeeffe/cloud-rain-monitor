@@ -1,35 +1,13 @@
 #!/usr/bin/env python
 
 import sqlite3
-from bottle import route, run, debug, error, request
-
+from bottle import route, run, debug, error, request, static_file
 from collector import Collector
+from charts import ChartGenerator
 
 '''
 A very simple python bottle micro service for weather
 '''
-
-
-def estimate_cloud_cover(sky_temp, outside_temp):
-    '''
-    PURE guesswork currently!!! Will update this when more data collected
-    :param sky_temp:
-    :param outside_temp:
-    :return:
-    '''
-    if sky_temp > -5:
-        return 100
-    else:
-        temp_diff = sky_temp - outside_temp
-        if temp_diff < -20:
-            return 0
-        elif temp_diff  > -20 and sky_temp < -15:
-            return 30
-        elif temp_diff > -15 and temp_diff < -5:
-            return 75
-        elif temp_diff > -5:
-            return 100
-
 
 @route('/weather/current')
 def current_weather():
@@ -47,8 +25,7 @@ def current_weather():
     outside_temp = result[0][2]
     reading_timestamp = result[0][3]
     rain = result[0][0] == 1
-    cloud_cover = estimate_cloud_cover(float(sky_temp), float(outside_temp))
-    return {'rain': rain, 'skyTemp': sky_temp, 'outsideTemp': outside_temp, 'readingTimestamp': reading_timestamp, 'cloudCover':cloud_cover}
+    return {'rain': rain, 'skyTemp': sky_temp, 'outsideTemp': outside_temp, 'readingTimestamp': reading_timestamp}
 
 @route('/weather/history')
 def historical_weather():
@@ -69,12 +46,14 @@ def historical_weather():
         history.append({'rain': row[0] == 1, 'skyTemp': row[1], 'outsideTemp': row[2], 'readingTimestamp' : row[3]})
     return {'count': count, 'history': history}
 
+@route('/weather/chart/<chart>')
+def cloud_chart(chart):
+    chartGenerator = ChartGenerator()
+    chartGenerator.generate_chart()
+    return static_file(chart, root='/tmp')
 
 con = sqlite3.connect('weather_sensor.db')
-#con.execute("DROP TABLE IF EXISTS weather_sensor")
 con.execute("CREATE TABLE IF NOT EXISTS weather_sensor (id INTEGER PRIMARY KEY, rain bool NOT NULL, sky_temperature NUMBER NOT NULL, ambient_temperature NUMBER NOT NULL, date_sensor_read DATETIME DEFAULT CURRENT_TIMESTAMP)")
 con.commit()
-collector = Collector('/dev/ttyACM0')
+# collector = Collector('/dev/ttyACM0')
 run(host='0.0.0.0', port=8080)
-# remember to remove reloader=True and debug(True) when you move your
-# application from development to a productive environment

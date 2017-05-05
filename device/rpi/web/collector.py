@@ -16,6 +16,9 @@ class Collector():
     NAME = "Collector"
 
     def __init__(self, port):
+        '''
+        Constructor. Adds the callback handler to accept firmata messages from the arduino board connected to the sensors.
+        '''
         self.last_rain_reading_saved = None;
         self.last_sky_temperature_reading_saved = 0;
         self.last_ambient_temperature_reading_saved = 0;
@@ -63,7 +66,7 @@ class Collector():
         try:
             self.board.exit()
         except AttributeError:
-            print "exit() raised an AttributeError unexpectedly!" + self.toString()
+            print('exit() raised an AttributeError unexpectedly!')
 
 
     def should_persist_sensor_reading(self, sky_temperature, ambient_temperature, rain):

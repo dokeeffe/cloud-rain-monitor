@@ -25,13 +25,25 @@ class ChartGenerator:
         return cc
 
     def generate_cloud_chart(self):
-        conn = sqlite3.connect('weather_sensor.db')
-        weather = pd.read_sql(self.SQL, conn)
-        conn.close()
-        weather.index = pd.to_datetime(weather.date_sensor_read)
+        weather = self._last_24hrs_data()
         weather['CloudCover'] = weather.apply(lambda x: self._calculate_cloud_cover(x['sky_temperature'], x['ambient_temperature']), axis=1)
         weather['Rain'] = weather[['rain']]*100
         rain_clouds = weather.loc[:,['Rain','CloudCover']]
         matplotlib.rcParams['figure.figsize'] = (6.0, 4.0)
         rain_clouds.resample('H').mean().plot();
-        plt.savefig(os.path.join(self.root_dir, './cloud.png'))
+        plt.savefig(os.path.join(self.root_dir, './cloud.png'), bbox_inches='tight')
+
+    def _last_24hrs_data(self):
+        conn = sqlite3.connect('weather_sensor.db')
+        weather = pd.read_sql(self.SQL, conn)
+        conn.close()
+        weather = weather.rename(columns={'date_sensor_read': 'Time'})
+        weather.index = pd.to_datetime(weather.Time)
+        return weather
+
+    def generate_temperature_chart(self):
+        weather = self._last_24hrs_data()
+        temperatures = weather.loc[:,['sky_temperature','ambient_temperature']]
+        matplotlib.rcParams['figure.figsize'] = (6.0, 4.0)
+        temperatures.resample('H').mean().plot();
+        plt.savefig(os.path.join(self.root_dir, './temperature.png'), bbox_inches='tight')

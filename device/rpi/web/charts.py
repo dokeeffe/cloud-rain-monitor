@@ -11,8 +11,8 @@ class ChartGenerator:
     NAME = 'ChartGenerator'
     SQL = "SELECT rain,sky_temperature, ambient_temperature, date_sensor_read FROM weather_sensor WHERE date_sensor_read >= date('now','-1 day')"
 
-    def __init__(self):
-        self.root_dir = '/tmp'
+    def __init__(self, root_dir):
+        self.root_dir = root_dir
         plt.style.use('fivethirtyeight')
 
 
@@ -27,7 +27,7 @@ class ChartGenerator:
     def generate_cloud_chart(self):
         conn = sqlite3.connect('weather_sensor.db')
         weather = pd.read_sql(self.SQL, conn)
-        weather = weather.rename(columns={'date_sensor_read': 'Time'})
+        conn.close()
         weather.index = pd.to_datetime(weather.date_sensor_read)
         weather['CloudCover'] = weather.apply(lambda x: self._calculate_cloud_cover(x['sky_temperature'], x['ambient_temperature']), axis=1)
         weather['Rain'] = weather[['rain']]*100

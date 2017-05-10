@@ -13,7 +13,7 @@ class ChartGenerator:
 
     def __init__(self, root_dir):
         self.root_dir = root_dir
-        plt.rcParams["figure.figsize"] = (20, 3)
+        plt.rcParams["figure.figsize"] = (10, 3)
         plt.style.use('fivethirtyeight')
 
 

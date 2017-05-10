@@ -49,7 +49,7 @@ def historical_weather():
 @route('/weather/chart/<chart>')
 def cloud_chart(chart):
     chartGenerator = ChartGenerator('/tmp')
-    if 'cloud' in chart:
+    if 'cloud.png' in chart:
         chartGenerator.generate_cloud_chart()
     else:
         chartGenerator.generate_temperature_chart()

@@ -9,11 +9,12 @@ import pandas as pd
 class ChartGenerator:
 
     NAME = 'ChartGenerator'
-    SQL = "SELECT rain,sky_temperature, ambient_temperature, date_sensor_read FROM weather_sensor WHERE date_sensor_read >= date('now','-1 day')"
+    HISTORICAL_DATA_SQL = "SELECT rain,sky_temperature, ambient_temperature, date_sensor_read FROM weather_sensor WHERE date_sensor_read >= date('now','-24 hour')"
 
     def __init__(self, root_dir):
         self.root_dir = root_dir
         plt.style.use('fivethirtyeight')
+        plt.rcParams["figure.figsize"] = (20,3)
 
 
     def _calculate_cloud_cover(self, sky, ambient):
@@ -35,7 +36,7 @@ class ChartGenerator:
 
     def _last_24hrs_data(self):
         conn = sqlite3.connect('weather_sensor.db')
-        weather = pd.read_sql(self.SQL, conn)
+        weather = pd.read_sql(self.HISTORICAL_DATA_SQL, conn)
         conn.close()
         weather = weather.rename(columns={'date_sensor_read': 'Time'})
         weather.index = pd.to_datetime(weather.Time)

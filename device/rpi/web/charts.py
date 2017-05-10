@@ -9,12 +9,12 @@ import pandas as pd
 class ChartGenerator:
 
     NAME = 'ChartGenerator'
-    HISTORICAL_DATA_SQL = "SELECT rain,sky_temperature, ambient_temperature, date_sensor_read FROM weather_sensor WHERE date_sensor_read >= date('now','-24 hour')"
+    HISTORICAL_DATA_SQL = "SELECT rain,sky_temperature, ambient_temperature, date_sensor_read FROM weather_sensor WHERE date_sensor_read >= date('now','-2400 hour')"
 
     def __init__(self, root_dir):
         self.root_dir = root_dir
+        plt.rcParams["figure.figsize"] = (20, 3)
         plt.style.use('fivethirtyeight')
-        plt.rcParams["figure.figsize"] = (20,3)
 
 
     def _calculate_cloud_cover(self, sky, ambient):
@@ -30,7 +30,6 @@ class ChartGenerator:
         weather['CloudCover'] = weather.apply(lambda x: self._calculate_cloud_cover(x['sky_temperature'], x['ambient_temperature']), axis=1)
         weather['Rain'] = weather[['rain']]*100
         rain_clouds = weather.loc[:,['Rain','CloudCover']]
-        matplotlib.rcParams['figure.figsize'] = (6.0, 4.0)
         rain_clouds.resample('H').mean().plot();
         plt.savefig(os.path.join(self.root_dir, './cloud.png'), bbox_inches='tight')
 
@@ -45,6 +44,5 @@ class ChartGenerator:
     def generate_temperature_chart(self):
         weather = self._last_24hrs_data()
         temperatures = weather.loc[:,['sky_temperature','ambient_temperature']]
-        matplotlib.rcParams['figure.figsize'] = (6.0, 4.0)
         temperatures.resample('H').mean().plot();
         plt.savefig(os.path.join(self.root_dir, './temperature.png'), bbox_inches='tight')

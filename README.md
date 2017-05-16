@@ -4,6 +4,8 @@ Arduino firmware and indi-driver for a device to measure rain and cloud cover fo
 
 ![example measurements](https://raw.githubusercontent.com/dokeeffe/cloud-rain-monitor/master/readme-files/temperature.png "Example measurements")
 
+![example measurements](https://raw.githubusercontent.com/dokeeffe/cloud-rain-monitor/master/readme-files/cloud.png "Example measurements")
+
 
 The device offers an HTTP interface to GET current conditions.
 

@@ -2,7 +2,7 @@
 
 Arduino firmware and indi-driver for a device to measure rain and cloud cover for an astronomical observatory. Cloud cover is determined by measuring the difference between ambient temperature and sky temperature.
 
-![example measurements](https://raw.githubusercontent.com/dokeeffe/cloud-rain-monitor/master/d3-graph/example.png "Example measurements")
+![example measurements](https://raw.githubusercontent.com/dokeeffe/cloud-rain-monitor/master/readme-files/temperature.png "Example measurements")
 
 
 The device offers an HTTP interface to GET current conditions.

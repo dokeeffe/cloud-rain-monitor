@@ -14,7 +14,8 @@ class ChartGenerator:
     def __init__(self, root_dir):
         self.root_dir = root_dir
         plt.rcParams["figure.figsize"] = (10, 3)
-        plt.style.use('fivethirtyeight')
+        #plt.style.use('fivethirtyeight')
+        plt.style.use('bmh')
 
 
     def _calculate_cloud_cover(self, sky, ambient):
@@ -30,7 +31,8 @@ class ChartGenerator:
         weather['CloudCover'] = weather.apply(lambda x: self._calculate_cloud_cover(x['sky_temperature'], x['ambient_temperature']), axis=1)
         weather['Rain'] = weather[['rain']]*100
         rain_clouds = weather.loc[:,['Rain','CloudCover']]
-        rain_clouds.resample('H').mean().plot();
+        rain_clouds.resample('5T').mean().plot();
+        # rain_clouds.plot();
         plt.savefig(os.path.join(self.root_dir, './cloud.png'), bbox_inches='tight')
 
     def _last_24hrs_data(self):
@@ -44,5 +46,5 @@ class ChartGenerator:
     def generate_temperature_chart(self):
         weather = self._last_24hrs_data()
         temperatures = weather.loc[:,['sky_temperature','ambient_temperature']]
-        temperatures.resample('H').mean().plot();
+        temperatures.plot();
         plt.savefig(os.path.join(self.root_dir, './temperature.png'), bbox_inches='tight')

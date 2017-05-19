@@ -9,7 +9,7 @@ import pandas as pd
 class ChartGenerator:
 
     NAME = 'ChartGenerator'
-    HISTORICAL_DATA_SQL = "SELECT rain,sky_temperature, ambient_temperature, date_sensor_read FROM weather_sensor WHERE date_sensor_read >= date('now','-24 hour')"
+    HISTORICAL_DATA_SQL = "SELECT rain,sky_temperature, ambient_temperature, date_sensor_read FROM weather_sensor WHERE date_sensor_read >= date('now','-2400 hour')"
 
     def __init__(self, root_dir):
         self.root_dir = root_dir
@@ -34,6 +34,8 @@ class ChartGenerator:
         rain_clouds.resample('5T').mean().plot();
         # rain_clouds.plot();
         plt.savefig(os.path.join(self.root_dir, './cloud.png'), bbox_inches='tight')
+        plt.clf()
+        plt.close()
 
     def _last_24hrs_data(self):
         conn = sqlite3.connect('weather_sensor.db')
@@ -48,3 +50,5 @@ class ChartGenerator:
         temperatures = weather.loc[:,['sky_temperature','ambient_temperature']]
         temperatures.plot();
         plt.savefig(os.path.join(self.root_dir, './temperature.png'), bbox_inches='tight')
+        plt.clf()
+        plt.close()

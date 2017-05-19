@@ -9,7 +9,7 @@ import pandas as pd
 class ChartGenerator:
 
     NAME = 'ChartGenerator'
-    HISTORICAL_DATA_SQL = "SELECT rain,sky_temperature, ambient_temperature, date_sensor_read FROM weather_sensor WHERE date_sensor_read >= date('now','-2400 hour')"
+    HISTORICAL_DATA_SQL = "SELECT rain,sky_temperature, ambient_temperature, date_sensor_read FROM weather_sensor WHERE date_sensor_read >= date('now','-24 hour')"
 
     def __init__(self, root_dir):
         self.root_dir = root_dir

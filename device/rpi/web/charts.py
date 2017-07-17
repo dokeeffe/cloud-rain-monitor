@@ -14,11 +14,17 @@ class ChartGenerator:
     def __init__(self, root_dir):
         self.root_dir = root_dir
         plt.rcParams["figure.figsize"] = (10, 3)
-        #plt.style.use('fivethirtyeight')
         plt.style.use('bmh')
+        self._conn = sqlite3.connect('weather_sensor.db')
 
 
     def _calculate_cloud_cover(self, sky, ambient):
+        '''
+        Needs work. +22ambient and -2.5sky and sky was 90% clear
+        :param sky:
+        :param ambient:
+        :return:
+        '''
         cc = ((sky+20)*7)-ambient
         if cc > 100:
             cc = 100
@@ -38,17 +44,18 @@ class ChartGenerator:
         plt.close()
 
     def _last_24hrs_data(self):
-        conn = sqlite3.connect('weather_sensor.db')
-        weather = pd.read_sql(self.HISTORICAL_DATA_SQL, conn)
-        conn.close()
+        weather = pd.read_sql(self.HISTORICAL_DATA_SQL, self._conn)
         weather = weather.rename(columns={'date_sensor_read': 'Time'})
         weather.index = pd.to_datetime(weather.Time)
         return weather
 
     def generate_temperature_chart(self):
         weather = self._last_24hrs_data()
-        temperatures = weather.loc[:,['sky_temperature','ambient_temperature']]
+        temperatures = weather.loc[:, ['sky_temperature','ambient_temperature']]
         temperatures.plot();
         plt.savefig(os.path.join(self.root_dir, './temperature.png'), bbox_inches='tight')
         plt.clf()
         plt.close()
+
+    def __del__(self):
+        self._conn.close()

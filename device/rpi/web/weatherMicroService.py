@@ -48,13 +48,13 @@ def historical_weather():
 
 @route('/weather/chart/<chart>')
 def cloud_chart(chart):
-    chartGenerator = ChartGenerator('/tmp')
     if 'cloud.png' in chart:
-        chartGenerator.generate_cloud_chart()
+        _chartGenerator.generate_cloud_chart()
     else:
-        chartGenerator.generate_temperature_chart()
+        _chartGenerator.generate_temperature_chart()
     return static_file(chart, root='/tmp')
 
+_chartGenerator = ChartGenerator('/tmp')
 con = sqlite3.connect('weather_sensor.db')
 con.execute("CREATE TABLE IF NOT EXISTS weather_sensor (id INTEGER PRIMARY KEY, rain bool NOT NULL, sky_temperature NUMBER NOT NULL, ambient_temperature NUMBER NOT NULL, date_sensor_read DATETIME DEFAULT CURRENT_TIMESTAMP)")
 con.commit()

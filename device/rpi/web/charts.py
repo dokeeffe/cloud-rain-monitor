@@ -1,5 +1,4 @@
 import os
-
 import matplotlib
 import sqlite3
 matplotlib.use('Agg')
@@ -44,10 +43,12 @@ class ChartGenerator:
         plt.close()
 
     def _last_24hrs_data(self):
-        weather = pd.read_sql(self.HISTORICAL_DATA_SQL, self._conn)
-        weather = weather.rename(columns={'date_sensor_read': 'Time'})
-        weather.index = pd.to_datetime(weather.Time)
-        return weather
+        conn = sqlite3.connect('weather_sensor.db')
+        with conn:
+            weather = pd.read_sql(self.HISTORICAL_DATA_SQL, self._conn)
+            weather = weather.rename(columns={'date_sensor_read': 'Time'})
+            weather.index = pd.to_datetime(weather.Time)
+            return weather
 
     def generate_temperature_chart(self):
         weather = self._last_24hrs_data()
@@ -56,6 +57,3 @@ class ChartGenerator:
         plt.savefig(os.path.join(self.root_dir, './temperature.png'), bbox_inches='tight')
         plt.clf()
         plt.close()
-
-    def __del__(self):
-        self._conn.close()

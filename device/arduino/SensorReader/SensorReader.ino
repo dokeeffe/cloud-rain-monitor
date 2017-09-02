@@ -12,7 +12,7 @@
  * 
  * Wiring:
  * Rain sensor: 
- *      Relay is attached to pin 8 and acts as a simple on off switch
+ *      Relay is attached to pin 8 and acts as a simple on off switch. Ensure you wire with a pull-down resistor. If you dont know what that means goodle 'arduino button' to see how a basic switch/button is wired.
  * MLX90614
  *      Wired to A4 and A5 with 2 pull up resistors (see https://learn.adafruit.com/using-melexis-mlx90614-non-contact-sensors/wiring-and-test)
  *      

@@ -4,12 +4,7 @@ An Arduino firmware, Raspberry PI application and indi-driver for a device to me
 
 ![](https://raw.githubusercontent.com/dokeeffe/cloud-rain-monitor/master/readme-files/weatherstation1.png)
 
-![example measurements](https://raw.githubusercontent.com/dokeeffe/cloud-rain-monitor/master/readme-files/temperature.png "Example measurements")
-
-![example measurements](https://raw.githubusercontent.com/dokeeffe/cloud-rain-monitor/master/readme-files/cloud.png "Example measurements")
-
-
-The device offers an HTTP interface to GET current conditions.
+The device offers an HTTP interface to GET current conditions. See below for the full API 
 
 Example request to /weather
 ```
@@ -36,4 +31,81 @@ An [Indi Driver](http://www.indilib.org/devices/weather-stations.html) for obser
 The device and driver is currently used in Ballyhoura Observatory
 
 ![observatory](https://raw.githubusercontent.com/dokeeffe/cloud-rain-monitor/master/indi-driver/docs/obs.jpeg)
+
+**Current weather status**
+----
+
+* **URL**
+
+  /weather/current
+
+* **Method:**
+  
+  <_The request type_>
+
+  `GET`
+  
+* **Success Response:**
+  
+  * **Code:** 200 <br />
+    **Content:** `{"outsideTemp": 2.75, "skyTemp": -21.77, "readingTimestamp": "2018-03-25 18:02:46", "rain": false}`
+
+**Historical weather**
+----
+
+Returns history for the previous 24 hours
+
+* **URL**
+
+  /weather/history
+
+* **Method:**
+
+  <_The request type_>
+
+  `GET`
+
+* **Success Response:**
+
+  * **Code:** 200 <br />
+    **Content:** `[{"outsideTemp": 2.75, "skyTemp": -21.77, "readingTimestamp": "2018-03-25 18:02:46", "rain": false}, {"outsideTemp": 2.75, "skyTemp": -21.77, "readingTimestamp": "2018-03-25 18:02:46", "rain": false}....]`
+
+
+**Charts**
+----
+
+Returns an image weather chart
+
+* **URL**
+
+  /weather/chart/<chart>
+
+* **Method:**
+
+  <_The request type_>
+
+  `GET`
+
+*  **URL Params**
+
+   **Required:**
+ 
+   `<chart>`
+
+   Valid values are 'cloud.png' and 'temperature.png'
+
+* **Sample Call:**
+
+    http://192.168.2.227:8080/weather/chart/cloud.png
+
+* **Success Response:**
+
+  * **Code:** 200 <br />
+    **Content:** 
+
+    ![example measurements](https://raw.githubusercontent.com/dokeeffe/cloud-rain-monitor/master/readme-files/temperature.png "Example measurements")
+ 
+    ![example measurements](https://raw.githubusercontent.com/dokeeffe/cloud-rain-monitor/master/readme-files/cloud.png "Example measurements")
+
+
 

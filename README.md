@@ -49,8 +49,6 @@ The device and driver is currently used in Ballyhoura Observatory
 
 * **Method:**
   
-  <_The request type_>
-
   `GET`
   
 * **Success Response:**
@@ -68,8 +66,6 @@ Returns history for the previous 24 hours
   /weather/history
 
 * **Method:**
-
-  <_The request type_>
 
   `GET`
 
@@ -89,8 +85,6 @@ Returns an image weather chart
   /weather/chart/<chart>
 
 * **Method:**
-
-  <_The request type_>
 
   `GET`
 

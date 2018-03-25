@@ -32,6 +32,8 @@ The device and driver is currently used in Ballyhoura Observatory
 
 ![observatory](https://raw.githubusercontent.com/dokeeffe/cloud-rain-monitor/master/indi-driver/docs/obs.jpeg)
 
+# HTTP API
+
 **Current weather status**
 ----
 

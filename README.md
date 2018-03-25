@@ -2,7 +2,13 @@
 
 An Arduino firmware, Raspberry PI application and indi-driver for a device to measure rain and cloud cover for an astronomical observatory. Cloud cover is determined by measuring the difference between ambient temperature and sky temperature.
 
+**Outside**
+
 ![](https://raw.githubusercontent.com/dokeeffe/cloud-rain-monitor/master/readme-files/weatherstation1.png)
+
+**Inside**
+
+![](https://raw.githubusercontent.com/dokeeffe/cloud-rain-monitor/master/readme-files/weatherstation2.png)
 
 The device offers an HTTP interface to GET current conditions. See below for the full API 
 

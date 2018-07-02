@@ -170,11 +170,11 @@ bool IndiCloudRainMonitor::initProperties()
     IUFillText(&httpEndpointT[0], "API_ENDPOINT", "API Endpoint", "http://192.168.1.204/weather"); //this is the default but can be changed in the options OPTIONS_TAB.
     IUFillTextVector(&httpEndpointTP, httpEndpointT, 1, getDeviceName(), "HTTP_API_ENDPOINT", "HTTP endpoint", OPTIONS_TAB, IP_RW, 5, IPS_IDLE);
     
-    addParameter("WEATHER_RAIN", "Rain", 0, 0, 0, 0);
+    addParameter("WEATHER_RAIN", "Rain", 0, 0, 0);
     setCriticalParameter("WEATHER_RAIN");
-    addParameter("WEATHER_STATION_ONLINE", "Station Online", 0, 0, 0, 0);
+    addParameter("WEATHER_STATION_ONLINE", "Station Online", 0, 0, 0);
     setCriticalParameter("WEATHER_STATION_ONLINE");
-    addParameter("WEATHER_CLOUD_COVER", "Cloud Cover", 0, 0, 0, 0);
+    addParameter("WEATHER_CLOUD_COVER", "Cloud Cover", 0, 0, 0);
     setCriticalParameter("WEATHER_CLOUD_COVER");
     
     addDebugControl();

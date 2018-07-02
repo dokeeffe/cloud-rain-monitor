@@ -1,29 +1,13 @@
-import sqlite3
-from bottle import route, run, debug, error
+#!/usr/bin/env python
 
+import sqlite3
+from bottle import route, run, debug, error, request, static_file
 from collector import Collector
+from charts import ChartGenerator
 
 '''
 A very simple python bottle micro service for weather
 '''
-
-
-def estimate_cloud_cover(sky_temp, outside_temp):
-    '''
-    PURE guesswork currently!!! Will update this when more data collected
-    :param sky_temp:
-    :param outside_temp:
-    :return:
-    '''
-    if sky_temp < -12:
-        return 0
-    elif sky_temp > -12 and sky_temp < -10:
-        return 10
-    elif sky_temp > -10 and sky_temp < -5:
-        return 75
-    elif sky_temp > -5:
-        return 100
-
 
 @route('/weather/current')
 def current_weather():
@@ -41,19 +25,18 @@ def current_weather():
     outside_temp = result[0][2]
     reading_timestamp = result[0][3]
     rain = result[0][0] == 1
-    cloud_cover = estimate_cloud_cover(float(sky_temp), float(outside_temp))
-    return {'rain': rain, 'skyTemp': sky_temp, 'outsideTemp': outside_temp, 'readingTimestamp': reading_timestamp, 'cloudCover':cloud_cover}
+    return {'rain': rain, 'skyTemp': sky_temp, 'outsideTemp': outside_temp, 'readingTimestamp': reading_timestamp}
 
-@route('/weather')
-def current_weather():
+@route('/weather/history')
+def historical_weather():
     '''
-    Return all the weather data recorded
-    TODO: pagination or trim the data to 1 day
+    Return historical weather data. Pass days=x as a qurey string arg to get the previous x days data.
     :return:
     '''
     conn = sqlite3.connect('weather_sensor.db')
     c = conn.cursor()
-    c.execute("SELECT rain,sky_temperature, ambient_temperature, date_sensor_read FROM weather_sensor")
+    days = request.query.days or 1
+    c.execute("SELECT rain,sky_temperature, ambient_temperature, date_sensor_read FROM weather_sensor WHERE date_sensor_read >= date('now','-{} day')".format(days))
     result = c.fetchall()
     c.close()
     history = []
@@ -63,12 +46,17 @@ def current_weather():
         history.append({'rain': row[0] == 1, 'skyTemp': row[1], 'outsideTemp': row[2], 'readingTimestamp' : row[3]})
     return {'count': count, 'history': history}
 
+@route('/weather/chart/<chart>')
+def cloud_chart(chart):
+    if 'cloud.png' in chart:
+        _chartGenerator.generate_cloud_chart()
+    else:
+        _chartGenerator.generate_temperature_chart()
+    return static_file(chart, root='/tmp')
 
+_chartGenerator = ChartGenerator('/tmp')
 con = sqlite3.connect('weather_sensor.db')
-con.execute("DROP TABLE IF EXISTS weather_sensor")
-con.execute("CREATE TABLE weather_sensor (id INTEGER PRIMARY KEY, rain bool NOT NULL, sky_temperature NUMBER NOT NULL, ambient_temperature NUMBER NOT NULL, date_sensor_read DATETIME DEFAULT CURRENT_TIMESTAMP)")
+con.execute("CREATE TABLE IF NOT EXISTS weather_sensor (id INTEGER PRIMARY KEY, rain bool NOT NULL, sky_temperature NUMBER NOT NULL, ambient_temperature NUMBER NOT NULL, date_sensor_read DATETIME DEFAULT CURRENT_TIMESTAMP)")
 con.commit()
 collector = Collector('/dev/ttyACM0')
 run(host='0.0.0.0', port=8080)
-# remember to remove reloader=True and debug(True) when you move your
-# application from development to a productive environment

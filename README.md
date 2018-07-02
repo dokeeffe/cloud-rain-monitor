@@ -38,6 +38,20 @@ The device and driver is currently used in Ballyhoura Observatory
 
 ![observatory](https://raw.githubusercontent.com/dokeeffe/cloud-rain-monitor/master/indi-driver/docs/obs.jpeg)
 
+# Build notes/instructions
+
+* 1 Flash the ino file to an arduino nano. 
+
+* 2 Wiring diagram (in progress)
+
+* 3 Clone this repo to raspberry pi then add a line to /etc/rc.local to start the weather micro service on startup
+
+```
+
+# start the weatherstation
+/home/pi/code/github/cloud-rain-monitor/device/rpi/web/weatherMicroService.py &
+```
+
 # HTTP API
 
 **Current weather status**

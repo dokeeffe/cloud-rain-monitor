@@ -4,6 +4,7 @@ import sqlite3
 matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 import pandas as pd
+import math 
 
 class ChartGenerator:
 
@@ -24,10 +25,11 @@ class ChartGenerator:
         :param ambient:
         :return:
         '''
-        cc = ((sky+20)*7)-ambient
-        if cc > 100:
+        td = (33/100)*(ambient-0/10)+(4/100)*math.pow((math.exp(100/1000*ambient)), (100/100))
+        cc = sky-td
+        if cc > 10:
             cc = 100
-        if cc < 10:
+        if cc < 1:
             cc = 0
         return cc
 

@@ -24,7 +24,7 @@ def current_weather():
     sky_temp = result[0][1]
     outside_temp = result[0][2]
     reading_timestamp = result[0][3]
-    rain = result[0][0] == 1
+    rain = (result[0][0] == 1 and sky_temp > -15) #hack to prevent a true for rain when the sky is clear. Sometimes dew triggers a false positive for rain
     return {'rain': rain, 'skyTemp': sky_temp, 'outsideTemp': outside_temp, 'readingTimestamp': reading_timestamp}
 
 @route('/weather/history')

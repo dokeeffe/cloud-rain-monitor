@@ -9,7 +9,7 @@ import math
 class ChartGenerator:
 
     NAME = 'ChartGenerator'
-    HISTORICAL_DATA_SQL = "SELECT rain,sky_temperature, ambient_temperature, date_sensor_read FROM weather_sensor WHERE date_sensor_read >= date('now','-24 hour')"
+    HISTORICAL_DATA_SQL = "SELECT rain,sky_temperature, ambient_temperature, date_sensor_read FROM weather_sensor WHERE date_sensor_read >= date('now','-240 hour')"
     MIN_SKY_TEMP_HISTORY =  "SELECT min(sky_temperature) as min_sky_temperature FROM weather_sensor WHERE date_sensor_read >= date('now','-10 day')"
 
     def __init__(self, root_dir):
@@ -42,7 +42,8 @@ class ChartGenerator:
         weather['Rain'] = weather[['rain']]*100
         rain_clouds = weather.loc[:,['Rain','CloudCover']]
         rain_clouds.resample('5T').mean().plot();
-        # rain_clouds.plot();
+        ax = rain_clouds.plot();
+        ax.set_ylabel("%")
         plt.savefig(os.path.join(self.root_dir, './cloud.png'), bbox_inches='tight')
         plt.clf()
         plt.close()
@@ -68,9 +69,9 @@ class ChartGenerator:
 
     def generate_temperature_chart(self):
         weather = self._last_24hrs_data()
-        weather['diff'] = weather['ambient_temperature'] - weather['sky_temperature']
-        temperatures = weather.loc[:, ['sky_temperature','ambient_temperature', 'diff']]
-        temperatures.plot();
+        temperatures = weather.loc[:, ['sky_temperature','ambient_temperature']]
+        ax = temperatures.plot();
+        ax.set_ylabel("Temp Deg C")
         plt.savefig(os.path.join(self.root_dir, './temperature.png'), bbox_inches='tight')
         plt.clf()
         plt.close()

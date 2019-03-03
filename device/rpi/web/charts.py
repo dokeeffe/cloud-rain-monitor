@@ -9,7 +9,7 @@ import math
 class ChartGenerator:
 
     NAME = 'ChartGenerator'
-    HISTORICAL_DATA_SQL = "SELECT rain,sky_temperature, ambient_temperature, date_sensor_read FROM weather_sensor WHERE date_sensor_read >= date('now','-240 hour')"
+    HISTORICAL_DATA_SQL = "SELECT rain,sky_temperature, ambient_temperature, date_sensor_read FROM weather_sensor WHERE date_sensor_read >= date('now','-24 hour')"
     MIN_SKY_TEMP_HISTORY =  "SELECT min(sky_temperature) as min_sky_temperature FROM weather_sensor WHERE date_sensor_read >= date('now','-10 day')"
 
     def __init__(self, root_dir):

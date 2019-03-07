@@ -62,7 +62,7 @@ class ChartGenerator:
             cursor=conn.cursor()
             cursor.execute(self.MIN_SKY_TEMP_HISTORY)
             mintemp = cursor.fetchone()[0]
-            if mintemp > -5:
+            if mintemp > -5 or mintemp < -25:
                 return -20 #-20 is a good guess for 100% clear sky
             else:
                 return mintemp

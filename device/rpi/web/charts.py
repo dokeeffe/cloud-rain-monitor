@@ -26,8 +26,9 @@ class ChartGenerator:
         :param recent_clear_sky_temp
         :return:
         '''
+        print(recent_clear_sky_temp)
         scaling_factor = 100 / abs(recent_clear_sky_temp)
-        x = abs(((sky * -1) * scaling_factor) - 100)
+        x = abs(((sky * -1) * scaling_factor) - 75)
         if x < 0:
             return 0
         elif x > 100:

@@ -24,7 +24,8 @@ def current_weather():
     sky_temp = result[0][1]
     outside_temp = result[0][2]
     reading_timestamp = result[0][3]
-    rain = (result[0][0] == 1 and sky_temp > -15) #hack to prevent a true for rain when the sky is clear. Sometimes dew triggers a false positive for rain
+    #rain = (result[0][0] == 1 and sky_temp - outside_temp > -20 and sky_temp > -10) #hack to prevent a true for rain when the sky is clear. Sometimes dew triggers a false positive for rain
+    rain = result[0][0] == 1 
     return {'rain': rain, 'skyTemp': sky_temp, 'outsideTemp': outside_temp, 'readingTimestamp': reading_timestamp}
 
 @route('/weather/history')
@@ -53,6 +54,30 @@ def cloud_chart(chart):
     else:
         _chartGenerator.generate_temperature_chart()
     return static_file(chart, root='/tmp')
+
+@route('/weather/safety')
+def safety():
+    '''
+    GET the current weather state. the latest reading persisted in the DB.
+    TODO: If the reading is older than 5min then return 404?
+    :return:
+    '''
+    conn = sqlite3.connect('weather_sensor.db')
+    c = conn.cursor()
+    c.execute("SELECT rain,sky_temperature,ambient_temperature, date_sensor_read FROM weather_sensor order by id desc limit 1")
+    result = c.fetchall()
+    c.close()
+    sky_temp = result[0][1]
+    outside_temp = result[0][2]
+    reading_timestamp = result[0][3]
+    raining = (result[0][0] == 1 and sky_temp - outside_temp > -20 and sky_temp > -10) #hack to prevent a true for rain when the sky is clear. Sometimes dew triggers a false positive for rain
+    roof_status = {'open_ok': 1, 'reasons': ''}
+    if sky_temp - outside_temp > -17:
+        roof_status = {'open_ok': 0, 'reasons': 'Cloudy'}
+    if raining:
+        roof_status = {'open_ok': 0, 'reasons': 'Raining'}
+    return {'timestamp_utc': reading_timestamp, 'roof_status': roof_status}
+
 
 _chartGenerator = ChartGenerator('/tmp')
 con = sqlite3.connect('weather_sensor.db')

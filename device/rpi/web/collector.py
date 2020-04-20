@@ -47,7 +47,7 @@ class Collector():
             print('inserting observation')
             c.execute("INSERT INTO weather_sensor (rain,sky_temperature,ambient_temperature) VALUES (?,?,?)",
                       (rain, sky_temperature, ambient_temperature))
-            c.execute("DELETE FROM weather_sensor WHERE  date_sensor_read <= date('now','-100 day')")
+            c.execute("DELETE FROM weather_sensor WHERE  date_sensor_read <= date('now','-365 day')")
             print('inserted')
             # new_id = c.lastrowid
             conn.commit()

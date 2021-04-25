@@ -185,7 +185,7 @@ void IndiCloudRainMonitor::ISGetProperties(const char *dev)
 {
     INDI::Weather::ISGetProperties(dev);
 
-    defineText(&httpEndpointTP);
+    defineProperty(&httpEndpointTP);
     loadConfig(true, "HTTP_API_ENDPOINT");
 }
 
@@ -258,7 +258,7 @@ IPState IndiCloudRainMonitor::updateWeather()
         double skyTemp;
         double ambientTemp;
         for (it = begin(value); it!= end(value); ++it) {
-            DEBUGF(INDI::Logger::DBG_DEBUG, "iterating %s", it->key);
+            LOGF_DEBUG("iterating %s", it->key);
             if (!strcmp(it->key, "rain")) {
                 //bool raining = it->value.toBool();
                 //DEBUGF(INDI::Logger::DBG_DEBUG, "Setting rain value from response %s", it->value);
@@ -269,11 +269,11 @@ IPState IndiCloudRainMonitor::updateWeather()
                 }
             }
             if (!strcmp(it->key, "skyTemp")) {
-                DEBUGF(INDI::Logger::DBG_DEBUG, "Got skyTemp from response %g", it->value.toNumber());
+                LOGF_DEBUG("Got skyTemp from response %g", it->value.toNumber());
                 skyTemp = it->value.toNumber();
             }
             if (!strcmp(it->key, "outsideTemp")) {
-                DEBUGF(INDI::Logger::DBG_DEBUG, "Got outsideTemp from response %g", it->value.toNumber());
+                LOGF_DEBUG("Got outsideTemp from response %g", it->value.toNumber());
                 ambientTemp = it->value.toNumber();
             }
         }
@@ -285,7 +285,7 @@ IPState IndiCloudRainMonitor::updateWeather()
         if(result < 0) {
             result = 0;
         }
-        DEBUGF(INDI::Logger::DBG_DEBUG, "CLOUD %g", result);
+        LOGF_DEBUG("CLOUD %g", result);
         setParameterValue("WEATHER_CLOUD_COVER", result);      
     }
     setParameterValue("WEATHER_STATION_ONLINE", 0);
